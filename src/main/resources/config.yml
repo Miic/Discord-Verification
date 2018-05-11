@@ -23,7 +23,7 @@ Messages:
   unlinked: '&9&lDiscord &8>>&r Successfully unlinked'
   ts3join: 'Hey %user%, you are not verified yet if you want to be use /discord verify ingame'
   invalidcode: 'Your code was invalid!'
-  success: 'Successfully linked ***%minecraft%*** with %discord%'
+  success: 'Successfully linked ***IGN: %minecraft%*** with %discord%'
   updated: '&9&lDiscord &8>>&r Successfully updated discord ranks'
-  help: 'Commands: %nl /discord verify %nl /discord unlink %nl /discord update'
+  help: 'Commands: %nl /discord verify %nl /discord unlink'
 
