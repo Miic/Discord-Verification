@@ -12,13 +12,16 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class CommandDiscord implements CommandExecutor, TabExecutor {
 
-    public static HashMap<String, String> users = new HashMap<>();
+    public static Cache<String, UUID> users = (Cache) CacheBuilder.newBuilder().maximumSize(100L).build();
 
     private String generateString(){
         String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567980";
@@ -47,18 +50,17 @@ public class CommandDiscord implements CommandExecutor, TabExecutor {
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("verify")) {
-                    if (users.containsKey(player.getName())) {
-                        player.sendMessage(cfg.getString("Messages.running").replace("&", "§").replace("%code%", users.get(player.getName())));
-                    } else if (MySQL.userExists(player)) {
+                    if (MySQL.userExists(player)) {
                         player.sendMessage(cfg.getString("Messages.verified").replace("&", "§"));
                     } else {
-                        users.put(player.getName(), generateString());
-                        player.sendMessage(cfg.getString("Messages.verify").replace("&", "§").replace("%code%", users.get(player.getName())));
+                    	final String rand = generateString();
+                        users.put(rand, player.getUniqueId());
+                        player.sendMessage(cfg.getString("Messages.verify").replace("&", "§").replaceAll("%code%", rand));
                         Bukkit.getScheduler().runTaskLater(Main.instance, new Runnable() {
                             @Override
                             public void run() {
-                                if (users.containsKey(player.getName())) {
-                                    users.remove(player.getName());
+                                if (users.getIfPresent(rand) != null) {
+                                    users.invalidate(rand);
                                 }
                             }
                         }, 60 * 1000);
@@ -73,17 +75,18 @@ public class CommandDiscord implements CommandExecutor, TabExecutor {
                         MySQL.deleteUser(player);
                         player.sendMessage(cfg.getString("Messages.unlinked").replace("&", "§"));
                     }
-                } else if(args[0].equalsIgnoreCase("update")){
-                    if (!MySQL.userExists(player)) {
-                        player.sendMessage(cfg.getString("Messages.notverified").replace("&", "§"));
-                    } else {
-                        GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
-                        Member member = guild.getGuild().getMemberById(MySQL.getValue(player, "discordid"));
-                        Role role = guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"));
-                        guild.addRolesToMember(member, role).queue();
-                        player.sendMessage(cfg.getString("Messages.updated").replace("&", "§"));
-                    }
                 }
+//                } else if(args[0].equalsIgnoreCase("update")){
+//                    if (!MySQL.userExists(player)) {
+//                        player.sendMessage(cfg.getString("Messages.notverified").replace("&", "§"));
+//                    } else {
+//                        GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
+//                        Member member = guild.getGuild().getMemberById(MySQL.getValue(player, "discordid"));
+//                        Role role = guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"));
+//                        guild.addRolesToMember(member, role).queue();
+//                        player.sendMessage(cfg.getString("Messages.updated").replace("&", "§"));
+//                    }
+//                }
             } else {
                 player.sendMessage(cfg.getString("Messages.help").replace("%nl", "\n").replace("&", "§"));
             }

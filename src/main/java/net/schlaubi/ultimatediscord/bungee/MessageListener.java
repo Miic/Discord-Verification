@@ -46,7 +46,7 @@ public class MessageListener extends ListenerAdapter{
                 for(Role r : jda.getGuilds().get(0).getRoles()){
                     sb.append("[R: " + r.getName() + "(" + r.getId() + ")");
                 }
-                event.getPrivateChannel().sendMessage(sb.toString()).queue();
+                event.getChannel().sendMessage(sb.toString()).queue();
             } else if(message.startsWith("!verify")){
                 if(users.containsValue(args[1])){
                     ProxiedPlayer pp = ProxyServer.getInstance().getPlayer(getUser(args[1]));
@@ -64,11 +64,11 @@ public class MessageListener extends ListenerAdapter{
 //                        }
 //                    }, 1000);
                     MySQL.createUser(pp.getName(), event.getAuthor().getId());
-                    event.getPrivateChannel().sendMessage(cfg.getString("Messages.success").replace("%discord%", event.getAuthor().getName())).complete();
+                    event.getChannel().sendMessage(cfg.getString("Messages.success").replace("%discord%", event.getAuthor().getName())).complete();
                     users.remove(pp.getName());
                     event.getMessage().delete().queue();
                 } else {
-                    event.getPrivateChannel().sendMessage(cfg.getString("Messages.invalidcode")).queue();
+                    event.getChannel().sendMessage(cfg.getString("Messages.invalidcode")).queue();
                     event.getMessage().delete().queue();
                 }
             }

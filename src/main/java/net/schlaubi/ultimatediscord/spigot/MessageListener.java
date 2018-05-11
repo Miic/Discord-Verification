@@ -8,21 +8,29 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.GuildController;
 import net.schlaubi.ultimatediscord.util.MySQL;
-import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.HashMap;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import com.google.common.cache.Cache;
+
+import java.util.UUID;
 
 public class MessageListener extends ListenerAdapter {
 
-    private static HashMap<String, String> users = CommandDiscord.users;
+    private static Cache<String, UUID> users = CommandDiscord.users;
 
     private static String getUser(String code) {
-        for(String key : users.keySet()) {
-            String value = users.get(key);
-            if(value.equalsIgnoreCase(code)) {
-                return key;
+    	UUID uuid = users.getIfPresent(code); 
+    	if (uuid != null) {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+            if (player.hasPlayedBefore()) {
+            	return player.getName();		
             }
-        }
+            return uuid.toString();
+    	}
         return null;
     }
 
@@ -35,20 +43,28 @@ public class MessageListener extends ListenerAdapter {
             String[] args = message.split(" ");
             JDA jda = event.getJDA();
             if(args[0].equalsIgnoreCase("!verify")) {
-                if (users.containsValue(args[1])) {
+                if (users.getIfPresent(args[1]) != null) {
+                	final UUID user = users.getIfPresent(args[1]);
                     GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
                     Role role = guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"));
                     guild.addRolesToMember(guild.getGuild().getMember(event.getAuthor()), role).queue();
-                    event.getPrivateChannel().sendMessage(cfg.getString("Messages.success").replace("%discord%", event.getAuthor().getName())).queue();
-                    MySQL.createUser(getUser(args[1]), event.getAuthor().getId());
-                    users.remove(getUser(args[1]));
+                    new BukkitRunnable() {
+                    	public void run() {
+                    		MySQL.createUser(user.toString(), event.getAuthor().getId());
+                    	}
+                    }.runTaskAsynchronously(Main.instance);
+                    
+                    event.getChannel().sendMessage(cfg.getString("Messages.success").replaceAll("%discord%", event.getAuthor().getAsMention())
+                    		.replaceAll("%minecraft%", getUser(args[1]))).queue();
+                    
+                    users.invalidate(args[1]);
                     event.getMessage().delete().queue();
                 } else {
-                    event.getPrivateChannel().sendMessage(cfg.getString("Messages.invalidcode")).queue();
-                    event.getMessage().delete().queue();
+                    event.getChannel().sendMessage(cfg.getString("Messages.invalidcode")).queue();
+                    //event.getMessage().delete().queue();
                 }
             } else if(args[0].equalsIgnoreCase("!roles")){
-            	if (!event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.MANAGE_SERVER)) {
+            	if (!event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.MANAGE_SERVER) && !event.getGuild().getOwner().getUser().equals(event.getAuthor())) {
             		return;
             	}
             	
@@ -56,9 +72,14 @@ public class MessageListener extends ListenerAdapter {
                 for(Role r : jda.getGuilds().get(0).getRoles()){
                     sb.append("[R: " + r.getName() + "(" + r.getId() + ")");
                 }
-                event.getPrivateChannel().sendMessage(sb.toString()).queue();
+                event.getChannel().sendMessage(sb.toString()).queue();
                 event.getMessage().delete().queue();
             }
+//            } else if (args[0].equalsIgnoreCase("!whois")) {
+//            	if (users.containsValue(args[1])) {
+//            		final String user = getUser(args[1]);
+//            	}
+//            }
         }
     }
 }
