@@ -70,12 +70,6 @@ public class CommandDiscord implements CommandExecutor, TabExecutor {
                         GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
                         Member member = guild.getGuild().getMember(Main.jda.getUserById(MySQL.getValue(player, "discordid")));
                         guild.removeRolesFromMember(member, guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"))).queue();
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                guild.removeRolesFromMember(member, guild.getGuild().getRoleById(cfg.getString("Roles.group." + Main.getPermissions().getPrimaryGroup(player)))).queue();
-                            }
-                        }, 1000);
                         MySQL.deleteUser(player);
                         player.sendMessage(cfg.getString("Messages.unlinked").replace("&", "§"));
                     }
@@ -85,7 +79,7 @@ public class CommandDiscord implements CommandExecutor, TabExecutor {
                     } else {
                         GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
                         Member member = guild.getGuild().getMemberById(MySQL.getValue(player, "discordid"));
-                        Role role = guild.getGuild().getRoleById(cfg.getString("Roles.group." + Main.getPermissions().getPrimaryGroup(player)));
+                        Role role = guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"));
                         guild.addRolesToMember(member, role).queue();
                         player.sendMessage(cfg.getString("Messages.updated").replace("&", "§"));
                     }

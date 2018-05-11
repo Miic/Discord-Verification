@@ -2,7 +2,7 @@ name: UltimateDiscord
 version: 1.2
 author: Schlaubi
 main: net.schlaubi.ultimatediscord.spigot.Main
-depend: [Vault]
+depend: []
 commands:
   discord:
     description: Discord command

@@ -48,16 +48,16 @@ public class MessageListener extends ListenerAdapter{
                     GuildController guild = new GuildController(jda.getGuilds().get(0));
                     Member member = jda.getGuilds().get(0).getMember(event.getAuthor());
                     guild.addRolesToMember(member, guild.getGuild().getRoleById(cfg.getLong("Roles.defaultrole"))).queue();
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            cfg.getSection("Roles.group").getKeys().forEach(i ->{
-                                if(pp.hasPermission("group." + i)){
-                                    guild.addRolesToMember(member, guild.getGuild().getRoleById(cfg.getLong("Roles.group." + i))).queue();
-                                }
-                            });
-                        }
-                    }, 1000);
+//                    new Timer().schedule(new TimerTask() {
+//                        @Override
+//                        public void run() {
+//                            cfg.getSection("Roles.group").getKeys().forEach(i ->{
+//                                if(pp.hasPermission("group." + i)){
+//                                    guild.addRolesToMember(member, guild.getGuild().getRoleById(cfg.getLong("Roles.group." + i))).queue();
+//                                }
+//                            });
+//                        }
+//                    }, 1000);
                     MySQL.createUser(pp.getName(), event.getAuthor().getId());
                     event.getPrivateChannel().sendMessage(cfg.getString("Messages.success").replace("%discord%", event.getAuthor().getName())).complete();
                     users.remove(pp.getName());

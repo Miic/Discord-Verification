@@ -6,14 +6,10 @@ import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.GuildController;
-import net.milkbowl.vault.permission.Permission;
 import net.schlaubi.ultimatediscord.util.MySQL;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MessageListener extends ListenerAdapter {
 
@@ -39,17 +35,9 @@ public class MessageListener extends ListenerAdapter {
             JDA jda = event.getJDA();
             if(args[0].equalsIgnoreCase("!verify")) {
                 if (users.containsValue(args[1])) {
-                    Permission perms = Main.getPermissions();
                     GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
-                    Role defaultrole = guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"));
-                    Role role = guild.getGuild().getRoleById(cfg.getString("Roles.group." + perms.getPrimaryGroup(Bukkit.getPlayer(getUser(args[1])))));
+                    Role role = guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"));
                     guild.addRolesToMember(guild.getGuild().getMember(event.getAuthor()), role).queue();
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            guild.addRolesToMember(guild.getGuild().getMember(event.getAuthor()), defaultrole).queue();
-                        }
-                    },1000);
                     event.getPrivateChannel().sendMessage(cfg.getString("Messages.success").replace("%discord%", event.getAuthor().getName())).queue();
                     MySQL.createUser(getUser(args[1]), event.getAuthor().getId());
                     users.remove(getUser(args[1]));

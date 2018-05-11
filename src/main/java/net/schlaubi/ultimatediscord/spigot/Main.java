@@ -4,13 +4,10 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import net.milkbowl.vault.permission.Permission;
 import net.schlaubi.ultimatediscord.util.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.security.auth.login.LoginException;
@@ -21,7 +18,6 @@ public class Main extends JavaPlugin {
 
     public static JDA jda;
     public static Main instance;
-    private static Permission perms;
 
 
     @Override
@@ -31,13 +27,7 @@ public class Main extends JavaPlugin {
         startBot();
         MySQL.connect();
         MySQL.createDatabase();
-        setupPermissions();
         this.getCommand("discord").setExecutor(new CommandDiscord());
-    }
-
-    private void setupPermissions() {
-        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = rsp.getProvider();
     }
 
     private void startBot() {
@@ -73,7 +63,4 @@ public class Main extends JavaPlugin {
         return YamlConfiguration.loadConfiguration(f);
     }
 
-    public static Permission getPermissions(){
-        return perms;
-    }
 }
