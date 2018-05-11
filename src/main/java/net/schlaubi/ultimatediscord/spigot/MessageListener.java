@@ -1,6 +1,7 @@
 package net.schlaubi.ultimatediscord.spigot;
 
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -29,7 +30,7 @@ public class MessageListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         FileConfiguration cfg = Main.getConfiguration();
-        if(event.isFromType(ChannelType.PRIVATE)){
+        if(!event.isFromType(ChannelType.PRIVATE)){
             String message = event.getMessage().getContentDisplay();
             String[] args = message.split(" ");
             JDA jda = event.getJDA();
@@ -41,15 +42,22 @@ public class MessageListener extends ListenerAdapter {
                     event.getPrivateChannel().sendMessage(cfg.getString("Messages.success").replace("%discord%", event.getAuthor().getName())).queue();
                     MySQL.createUser(getUser(args[1]), event.getAuthor().getId());
                     users.remove(getUser(args[1]));
+                    event.getMessage().delete().queue();
                 } else {
                     event.getPrivateChannel().sendMessage(cfg.getString("Messages.invalidcode")).queue();
+                    event.getMessage().delete().queue();
                 }
             } else if(args[0].equalsIgnoreCase("!roles")){
+            	if (!event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.MANAGE_SERVER)) {
+            		return;
+            	}
+            	
                 StringBuilder sb = new StringBuilder();
                 for(Role r : jda.getGuilds().get(0).getRoles()){
                     sb.append("[R: " + r.getName() + "(" + r.getId() + ")");
                 }
                 event.getPrivateChannel().sendMessage(sb.toString()).queue();
+                event.getMessage().delete().queue();
             }
         }
     }
