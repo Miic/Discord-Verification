@@ -136,21 +136,60 @@ public class MySQL {
         return false;
     }
 
-    public static void createUser(String player, String identity)
+    public static boolean createUser(Player player, String identity)
     {
         try
         {
         	Connection connection = hikari.getConnection();
+            
+            if (userExists(player)) {
+            	return false;
+            }
+            
+            if (userExists(identity)) {
+            	return false;
+            }
+            
             PreparedStatement ps = connection.prepareStatement("INSERT INTO ultimatediscord(`uuid`,`discordid`) VALUES (?, ?)");
-            ps.setString(1, player);
+            ps.setString(1, player.getUniqueId().toString());
             ps.setString(2, identity);
             ps.execute();
+            return true;
         }
         catch (SQLException e)
         {
             e.printStackTrace();
+            return false;
         }
     }
+    
+    public static boolean createUser(ProxiedPlayer player, String identity)
+    {
+        try
+        {
+        	Connection connection = hikari.getConnection();
+            
+            if (userExists(player)) {
+            	return false;
+            }
+            
+            if (userExists(identity)) {
+            	return false;
+            }
+            
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO ultimatediscord(`uuid`,`discordid`) VALUES (?, ?)");
+            ps.setString(1, player.getUniqueId().toString());
+            ps.setString(2, identity);
+            ps.execute();
+            return true;
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 
     public static String getValue(Player player, String type)

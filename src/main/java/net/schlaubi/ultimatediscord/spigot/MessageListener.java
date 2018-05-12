@@ -50,13 +50,12 @@ public class MessageListener extends ListenerAdapter {
                     guild.addRolesToMember(guild.getGuild().getMember(event.getAuthor()), role).queue();
                     new BukkitRunnable() {
                     	public void run() {
-                    		MySQL.createUser(user.toString(), event.getAuthor().getId());
+                    		if (MySQL.createUser(Bukkit.getPlayer(user), event.getAuthor().getId())) {
+                                event.getChannel().sendMessage(cfg.getString("Messages.success").replaceAll("%discord%", event.getAuthor().getAsMention())
+                                		.replaceAll("%minecraft%", getUser(args[1]))).queue();
+                    		}
                     	}
                     }.runTaskAsynchronously(Main.instance);
-                    
-                    event.getChannel().sendMessage(cfg.getString("Messages.success").replaceAll("%discord%", event.getAuthor().getAsMention())
-                    		.replaceAll("%minecraft%", getUser(args[1]))).queue();
-                    
                     users.invalidate(args[1]);
                     event.getMessage().delete().queue();
                 } else {

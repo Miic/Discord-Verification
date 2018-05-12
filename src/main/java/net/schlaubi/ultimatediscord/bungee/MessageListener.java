@@ -14,8 +14,6 @@ import net.md_5.bungee.config.Configuration;
 import net.schlaubi.ultimatediscord.util.MySQL;
 
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MessageListener extends ListenerAdapter{
 
@@ -63,7 +61,7 @@ public class MessageListener extends ListenerAdapter{
 //                            });
 //                        }
 //                    }, 1000);
-                    MySQL.createUser(pp.getName(), event.getAuthor().getId());
+                    MySQL.createUser(pp, event.getAuthor().getId());
                     event.getChannel().sendMessage(cfg.getString("Messages.success").replace("%discord%", event.getAuthor().getName())).complete();
                     users.remove(pp.getName());
                     event.getMessage().delete().queue();

@@ -21,7 +21,7 @@ Messages:
   verified: '&9&lDiscord &8>>&r You are already verified use /discord unlink to unlink your account'
   notverified: '&9&lDiscord &8>>&r You are not verified use /discord verify to verify your account'
   unlinked: '&9&lDiscord &8>>&r Successfully unlinked'
-  ts3join: 'Hey %user%, you are not verified yet if you want to be use /discord verify ingame'
+  #ts3join: 'Hey %user%, you are not verified yet if you want to be use /discord verify ingame'
   invalidcode: 'Your code was invalid!'
   success: 'Successfully linked ***IGN: %minecraft%*** with %discord%'
   updated: '&9&lDiscord &8>>&r Successfully updated discord ranks'
