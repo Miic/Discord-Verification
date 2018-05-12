@@ -73,7 +73,7 @@ public class MySQL {
         {
             Connection connection = hikari.getConnection();
             	
-            PreparedStatement ps = connection.prepareStatement("CREATE TABLE IF NOT EXISTS ultimatediscord( `id` INT NOT NULL AUTO_INCREMENT , `uuid` varchar(36) NOT NULL , `discordid` TEXT NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;");
+            PreparedStatement ps = connection.prepareStatement("CREATE TABLE IF NOT EXISTS ultimatediscord( `id` BIGINT NOT NULL AUTO_INCREMENT , `uuid` varchar(36) NOT NULL , `discordid` TEXT NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;");
             ps.execute();
             connection.close();
         }

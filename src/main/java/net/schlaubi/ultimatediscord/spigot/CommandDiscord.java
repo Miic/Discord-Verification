@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -50,31 +51,39 @@ public class CommandDiscord implements CommandExecutor, TabExecutor {
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("verify")) {
-                    if (MySQL.userExists(player)) {
-                        player.sendMessage(cfg.getString("Messages.verified").replace("&", "§"));
-                    } else {
-                    	final String rand = generateString();
-                        users.put(rand, player.getUniqueId());
-                        player.sendMessage(cfg.getString("Messages.verify").replace("&", "§").replaceAll("%code%", rand));
-                        Bukkit.getScheduler().runTaskLater(Main.instance, new Runnable() {
-                            @Override
-                            public void run() {
-                                if (users.getIfPresent(rand) != null) {
-                                    users.invalidate(rand);
-                                }
+                	new BukkitRunnable() {
+                		public void run() {
+                            if (MySQL.userExists(player)) {
+                                player.sendMessage(cfg.getString("Messages.verified").replace("&", "§"));
+                            } else {
+                            	final String rand = generateString();
+                                users.put(rand, player.getUniqueId());
+                                player.sendMessage(cfg.getString("Messages.verify").replace("&", "§").replaceAll("%code%", rand));
+                                Bukkit.getScheduler().runTaskLater(Main.instance, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (users.getIfPresent(rand) != null) {
+                                            users.invalidate(rand);
+                                        }
+                                    }
+                                }, 60 * 1000);
                             }
-                        }, 60 * 1000);
-                    }
+                		}
+                	}.runTaskAsynchronously(Main.instance);
                 } else if (args[0].equalsIgnoreCase("unlink")) {
-                    if (!MySQL.userExists(player)) {
-                        player.sendMessage(cfg.getString("Messages.notverified").replace("&", "§"));
-                    } else {
-                        GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
-                        Member member = guild.getGuild().getMember(Main.jda.getUserById(MySQL.getValue(player, "discordid")));
-                        guild.removeRolesFromMember(member, guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"))).queue();
-                        MySQL.deleteUser(player);
-                        player.sendMessage(cfg.getString("Messages.unlinked").replace("&", "§"));
-                    }
+                	new BukkitRunnable() {
+                		public void run() {
+                            if (!MySQL.userExists(player)) {
+                                player.sendMessage(cfg.getString("Messages.notverified").replace("&", "§"));
+                            } else {
+                                GuildController guild = new GuildController(Main.jda.getGuilds().get(0));
+                                Member member = guild.getGuild().getMember(Main.jda.getUserById(MySQL.getValue(player, "discordid")));
+                                guild.removeRolesFromMember(member, guild.getGuild().getRoleById(cfg.getString("Roles.defaultrole"))).queue();
+                                MySQL.deleteUser(player);
+                                player.sendMessage(cfg.getString("Messages.unlinked").replace("&", "§"));
+                            }
+                		}
+                	}.runTaskAsynchronously(Main.instance);
                 }
 //                } else if(args[0].equalsIgnoreCase("update")){
 //                    if (!MySQL.userExists(player)) {

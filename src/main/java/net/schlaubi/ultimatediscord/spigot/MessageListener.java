@@ -4,6 +4,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.GuildController;
@@ -54,10 +55,10 @@ public class MessageListener extends ListenerAdapter {
                                 event.getChannel().sendMessage(cfg.getString("Messages.success").replaceAll("%discord%", event.getAuthor().getAsMention())
                                 		.replaceAll("%minecraft%", getUser(args[1]))).queue();
                     		}
+                    		users.invalidate(args[1]);
                     	}
                     }.runTaskAsynchronously(Main.instance);
-                    users.invalidate(args[1]);
-                    event.getMessage().delete().queue();
+                    //event.getMessage().delete().queue();
                 } else {
                     event.getChannel().sendMessage(cfg.getString("Messages.invalidcode")).queue();
                     //event.getMessage().delete().queue();
@@ -73,12 +74,28 @@ public class MessageListener extends ListenerAdapter {
                 }
                 event.getChannel().sendMessage(sb.toString()).queue();
                 event.getMessage().delete().queue();
+            } else if (args[0].equalsIgnoreCase("!whois")) {
+            	new BukkitRunnable() {
+            		public void run() {
+                    	try {
+                            String rawmessage = event.getMessage().getContentRaw();
+                            String[] rawargs = rawmessage.split(" ");
+                    		
+                    		final User user = event.getGuild().getMemberById(rawargs[1].replaceAll("<@", "").replaceAll(">", "")).getUser();
+                    		final String id = user.getId();
+                    		if (MySQL.userExists(id)) {
+                    			String uuid = MySQL.getValue(id, "uuid");
+                    			event.getChannel().sendMessage(user.getAsMention() + " is linked to the following account: https://namemc.com/profile/" + uuid).queue();
+                    			
+                    		} else {
+                    			
+                    		}
+                    	} catch (Exception e) {
+                    		event.getChannel().sendMessage(cfg.getString("Unknown User Id: " + args[1])).queue();
+                    	}
+            		}
+            	}.runTaskAsynchronously(Main.instance);
             }
-//            } else if (args[0].equalsIgnoreCase("!whois")) {
-//            	if (users.containsValue(args[1])) {
-//            		final String user = getUser(args[1]);
-//            	}
-//            }
         }
     }
 }
