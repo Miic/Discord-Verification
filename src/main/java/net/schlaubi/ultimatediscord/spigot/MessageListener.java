@@ -54,6 +54,8 @@ public class MessageListener extends ListenerAdapter {
                     		if (MySQL.createUser(Bukkit.getPlayer(user), event.getAuthor().getId())) {
                                 event.getChannel().sendMessage(cfg.getString("Messages.success").replaceAll("%discord%", event.getAuthor().getAsMention())
                                 		.replaceAll("%minecraft%", getUser(args[1]))).queue();
+                    		} else {
+                                event.getChannel().sendMessage("Account linking failed. That Discord account or Minecraft account may already be associated with another account.");
                     		}
                     		users.invalidate(args[1]);
                     	}
@@ -81,15 +83,19 @@ public class MessageListener extends ListenerAdapter {
                             String rawmessage = event.getMessage().getContentRaw();
                             String[] rawargs = rawmessage.split(" ");
                     		
-                    		final User user = event.getGuild().getMemberById(rawargs[1].replaceAll("<@", "").replaceAll(">", "")).getUser();
-                    		final String id = user.getId();
-                    		if (MySQL.userExists(id)) {
-                    			String uuid = MySQL.getValue(id, "uuid");
-                    			event.getChannel().sendMessage(user.getAsMention() + " is linked to the following account: https://namemc.com/profile/" + uuid).queue();
-                    			
-                    		} else {
-                    			
-                    		}
+                            if (rawargs[1].startsWith("<@")) {
+	                    		final User user = event.getGuild().getMemberById(rawargs[1].replaceAll("<@", "").replaceAll(">", "")).getUser();
+	                    		final String id = user.getId();
+	                    		if (MySQL.userExists(id)) {
+	                    			String uuid = MySQL.getValue(id, "uuid");
+	                    			event.getChannel().sendMessage(user.getAsMention() + " is linked to the following account: https://namemc.com/profile/" + uuid).queue();
+	                    			
+	                    		} else {
+	                    			event.getChannel().sendMessage(user.getAsMention() + " is not currently linked to a Minecraft Account.");
+	                    		}
+                            } else {
+                            	event.getChannel().sendMessage("You did not mention a discord user.");
+                            }
                     	} catch (Exception e) {
                     		event.getChannel().sendMessage(cfg.getString("Unknown User Id: " + args[1])).queue();
                     	}
