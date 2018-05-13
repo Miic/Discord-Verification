@@ -18,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.google.common.cache.Cache;
 
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class MessageListener extends ListenerAdapter {
 
@@ -79,13 +80,14 @@ public class MessageListener extends ListenerAdapter {
             } else if (args[0].equalsIgnoreCase("!whois")) {
             	new BukkitRunnable() {
             		public void run() {
-                    	try {
-                            String rawmessage = event.getMessage().getContentRaw();
-                            String[] rawargs = rawmessage.split(" ");
-                    		
+                        String rawmessage = event.getMessage().getContentRaw();
+                        String[] rawargs = rawmessage.split(" ");
+                    	try {                    		
                             if (rawargs[1].startsWith("<@")) {
-	                    		final User user = event.getGuild().getMemberById(rawargs[1].replaceAll("<@", "").replaceAll(">", "")).getUser();
-	                    		final String id = user.getId();
+                            	String id = rawargs[1].replaceAll("<@", "").replaceAll(">", "").replaceAll("!", "");
+                            	//Bukkit.getLogger().log(Level.INFO, "Ultimate Discord Processing Discord ID: " + id);
+	                    		User user = event.getGuild().getMemberById(id).getUser();
+	                    		id = user.getId();
 	                    		if (MySQL.userExists(id)) {
 	                    			String uuid = MySQL.getValue(id, "uuid");
 	                    			event.getChannel().sendMessage(user.getAsMention() + " is linked to the following account: https://namemc.com/profile/" + uuid).queue();
@@ -97,7 +99,7 @@ public class MessageListener extends ListenerAdapter {
                             	event.getChannel().sendMessage("You did not mention a discord user.");
                             }
                     	} catch (Exception e) {
-                    		event.getChannel().sendMessage(cfg.getString("Unknown User Id: " + args[1])).queue();
+                    		event.getChannel().sendMessage("Unknown User Id: " + rawargs[1]).queue();
                     	}
             		}
             	}.runTaskAsynchronously(Main.instance);

@@ -18,21 +18,23 @@ public class Main extends JavaPlugin {
 
     public static JDA jda;
     public static Main instance;
+    public static JDABuilder bot;
 
 
     @Override
     public void onEnable() {
         instance = this;
         loadConfig();
-        startBot();
         MySQL.connect();
         MySQL.createDatabase();
         this.getCommand("discord").setExecutor(new CommandDiscord());
+        startBot();
+        
     }
 
     private void startBot() {
         FileConfiguration cfg = getConfiguration();
-        JDABuilder bot = new JDABuilder(AccountType.BOT);
+        bot = new JDABuilder(AccountType.BOT);
         bot.setAutoReconnect(true);
         bot.setToken(cfg.getString("Discord.token"));
         bot.setGame(Game.playing(cfg.getString("Discord.game")));
@@ -43,8 +45,6 @@ public class Main extends JavaPlugin {
             Bukkit.getConsoleSender().sendMessage("§4§l[UltimateDiscord] Invalid discord token");
             e.printStackTrace();
         }
-
-
     }
 
     @Override

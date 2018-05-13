@@ -6,3 +6,4 @@ depend: []
 commands:
   discord:
     description: Discord command
+    permission: UltimateDiscord.command

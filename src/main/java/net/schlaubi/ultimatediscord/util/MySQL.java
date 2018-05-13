@@ -29,6 +29,7 @@ public class MySQL {
 		config.setDriverClassName("com.mysql.jdbc.Driver");
 		config.setMinimumIdle(3);
 		config.setMaximumPoolSize(5);
+		config.setConnectionTimeout(5000);
 		config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database +"?autoReconnect=true&autoReconnectForPools=true&interactiveClient=true&characterEncoding=UTF-8");
 		config.setUsername(user);
 		config.setPassword(password);
@@ -49,6 +50,7 @@ public class MySQL {
 		config1.setDriverClassName("com.mysql.jdbc.Driver");
 		config1.setMinimumIdle(3);
 		config1.setMaximumPoolSize(5);
+		config1.setConnectionTimeout(5000);
 		config1.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database +"?autoReconnect=true&autoReconnectForPools=true&interactiveClient=true&characterEncoding=UTF-8");
 		config1.setUsername(user);
 		config1.setPassword(password);
@@ -91,7 +93,9 @@ public class MySQL {
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM ultimatediscord WHERE uuid =?");
             ps.setString(1,player.getUniqueId().toString());
             ResultSet rs = ps.executeQuery();
-            return rs.next();
+            boolean ret = rs.next();
+            connection.close();
+            return ret;
         }
         catch (SQLException e)
         {
@@ -108,7 +112,9 @@ public class MySQL {
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM ultimatediscord WHERE uuid = ?");
             ps.setString(1,player.getUniqueId().toString());
             ResultSet rs = ps.executeQuery();
-            return rs.next();
+            boolean ret = rs.next();
+            connection.close();
+            return ret;
         }
         catch (SQLException e)
         {
@@ -127,7 +133,9 @@ public class MySQL {
                 ps.setString(1, id);
             }
             ResultSet rs = ps.executeQuery();
-            return rs.next();
+            boolean ret = rs.next();
+            connection.close();
+            return ret;
         }
         catch (SQLException e)
         {
@@ -154,6 +162,7 @@ public class MySQL {
             ps.setString(1, player.getUniqueId().toString());
             ps.setString(2, identity);
             ps.execute();
+            connection.close();
             return true;
         }
         catch (SQLException e)
@@ -181,6 +190,7 @@ public class MySQL {
             ps.setString(1, player.getUniqueId().toString());
             ps.setString(2, identity);
             ps.execute();
+            connection.close();
             return true;
         }
         catch (SQLException e)
@@ -201,7 +211,9 @@ public class MySQL {
             ps.setString(1,player.getUniqueId().toString());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getString(type);
+            	String ret = rs.getString(type);
+            	connection.close();
+                return ret;
             }
         }
         catch (SQLException e)
@@ -220,7 +232,9 @@ public class MySQL {
             ps.setString(1,player.getUniqueId().toString());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getString(type);
+            	String ret = rs.getString(type);
+            	connection.close();
+                return ret;
             }
         }
         catch (SQLException e)
@@ -239,7 +253,9 @@ public class MySQL {
             ps.setString(1, identity);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getString(type);
+            	String ret = rs.getString(type);
+            	connection.close();
+                return ret;
             }
         }
         catch (SQLException e)
@@ -256,6 +272,7 @@ public class MySQL {
             PreparedStatement ps = connection.prepareStatement("DELETE FROM ultimatediscord WHERE uuid=?");
             ps.setString(1, player.getUniqueId().toString());
             ps.execute();
+            connection.close();
         }
         catch (SQLException e)
         {
@@ -271,6 +288,7 @@ public class MySQL {
             PreparedStatement ps = connection.prepareStatement("DELETE FROM ultimatediscord WHERE uuid=?");
             ps.setString(1,player.getUniqueId().toString());
             ps.execute();
+            connection.close();
         }
         catch (SQLException e)
         {
