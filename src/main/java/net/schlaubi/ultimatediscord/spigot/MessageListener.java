@@ -5,6 +5,7 @@ import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.GuildController;
@@ -18,7 +19,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.google.common.cache.Cache;
 
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class MessageListener extends ListenerAdapter {
 
@@ -93,10 +93,10 @@ public class MessageListener extends ListenerAdapter {
 	                    			event.getChannel().sendMessage(user.getAsMention() + " is linked to the following account: https://namemc.com/profile/" + uuid).queue();
 	                    			
 	                    		} else {
-	                    			event.getChannel().sendMessage(user.getAsMention() + " is not currently linked to a Minecraft Account.");
+	                    			event.getChannel().sendMessage(user.getAsMention() + " is not currently linked to a Minecraft Account.").queue();;
 	                    		}
                             } else {
-                            	event.getChannel().sendMessage("You did not mention a discord user.");
+                            	event.getChannel().sendMessage("You did not mention a discord user.").queue();
                             }
                     	} catch (Exception e) {
                     		event.getChannel().sendMessage("Unknown User Id: " + rawargs[1]).queue();
@@ -105,5 +105,17 @@ public class MessageListener extends ListenerAdapter {
             	}.runTaskAsynchronously(Main.instance);
             }
         }
+    }
+    
+    @Override
+    public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
+    	final String id = event.getMember().getUser().getId();
+    	new BukkitRunnable() {
+    		public void run() {
+    			if (MySQL.userExists(id)) {
+    				MySQL.deleteUser(id);
+    			}
+    		}
+    	}.runTaskAsynchronously(Main.instance);
     }
 }

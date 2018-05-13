@@ -280,13 +280,13 @@ public class MySQL {
         }
     }
 
-    public static void deleteUser(ProxiedPlayer player)
+    public static void deleteUser(String id)
     {
         try
         {
         	Connection connection = hikari.getConnection();
-            PreparedStatement ps = connection.prepareStatement("DELETE FROM ultimatediscord WHERE uuid=?");
-            ps.setString(1,player.getUniqueId().toString());
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM ultimatediscord WHERE discordid=?");
+            ps.setString(1,id);
             ps.execute();
             connection.close();
         }
@@ -296,7 +296,20 @@ public class MySQL {
         }
     }
 
-
+    public static void deleteUser(ProxiedPlayer player)
+    {
+        try
+        {
+        	Connection connection = hikari.getConnection();
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM ultimatediscord WHERE uuid=?");
+            ps.setString(1,player.getUniqueId().toString());
+            ps.execute();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
 
 }
