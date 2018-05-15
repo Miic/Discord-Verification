@@ -56,7 +56,7 @@ public class MessageListener extends ListenerAdapter {
                                 event.getChannel().sendMessage(cfg.getString("Messages.success").replaceAll("%discord%", event.getAuthor().getAsMention())
                                 		.replaceAll("%minecraft%", getUser(args[1]))).queue();
                     		} else {
-                                event.getChannel().sendMessage("Account linking failed. That Discord account or Minecraft account may already be associated with another account.");
+                                event.getChannel().sendMessage("Account linking failed. That Discord account or Minecraft account may already be associated with another account.").queue();
                     		}
                     		users.invalidate(args[1]);
                     	}

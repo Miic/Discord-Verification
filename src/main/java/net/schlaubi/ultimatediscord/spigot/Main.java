@@ -50,6 +50,7 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         MySQL.disconnect();
+        jda.shutdown();
     }
 
     private void loadConfig() {
