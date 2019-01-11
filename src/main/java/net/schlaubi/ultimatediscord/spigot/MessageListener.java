@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.GuildController;
+import net.schlaubi.ultimatediscord.util.CodeHandling;
 import net.schlaubi.ultimatediscord.util.MySQL;
 
 import org.bukkit.Bukkit;
@@ -22,7 +23,7 @@ import java.util.UUID;
 
 public class MessageListener extends ListenerAdapter {
 
-    private static Cache<String, UUID> users = CommandDiscord.users;
+    private static Cache<String, UUID> users = CodeHandling.getStringToUUID();
 
     private static String getUser(String code) {
     	UUID uuid = users.getIfPresent(code); 
@@ -39,11 +40,12 @@ public class MessageListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        FileConfiguration cfg = Main.getConfiguration();
-        if(!event.isFromType(ChannelType.PRIVATE)){
-            String message = event.getMessage().getContentDisplay();
-            String[] args = message.split(" ");
-            JDA jda = event.getJDA();
+    	final JDA jda = event.getJDA();
+        final FileConfiguration cfg = Main.getConfiguration();
+        final String message = event.getMessage().getContentDisplay();
+        final String[] args = message.split(" ");
+
+        if(event.isFromType(ChannelType.PRIVATE)){
             if(args[0].equalsIgnoreCase("!verify")) {
                 if (users.getIfPresent(args[1]) != null) {
                 	final UUID user = users.getIfPresent(args[1]);
@@ -61,31 +63,31 @@ public class MessageListener extends ListenerAdapter {
                     		users.invalidate(args[1]);
                     	}
                     }.runTaskAsynchronously(Main.instance);
-                    //event.getMessage().delete().queue();
                 } else {
                     event.getChannel().sendMessage(cfg.getString("Messages.invalidcode")).queue();
-                    //event.getMessage().delete().queue();
                 }
-            } else if(args[0].equalsIgnoreCase("!roles")){
-            	if (!event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.MANAGE_SERVER) && !event.getGuild().getOwner().getUser().equals(event.getAuthor())) {
-            		return;
-            	}
-            	
-                StringBuilder sb = new StringBuilder();
-                for(Role r : jda.getGuilds().get(0).getRoles()){
-                    sb.append("[R: " + r.getName() + "(" + r.getId() + ")");
-                }
-                event.getChannel().sendMessage(sb.toString()).queue();
-                event.getMessage().delete().queue();
-            } else if (args[0].equalsIgnoreCase("!whois")) {
-            	new BukkitRunnable() {
-            		public void run() {
-                        String rawmessage = event.getMessage().getContentRaw();
-                        String[] rawargs = rawmessage.split(" ");
-                    	try {                    		
-                            if (rawargs[1].startsWith("<@")) {
-                            	String id = rawargs[1].replaceAll("<@", "").replaceAll(">", "").replaceAll("!", "");
-                            	//Bukkit.getLogger().log(Level.INFO, "Ultimate Discord Processing Discord ID: " + id);
+            }
+        } else {
+	     	if(args[0].equalsIgnoreCase("!roles")){
+	        	if (!event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.MANAGE_SERVER) && !event.getGuild().getOwner().getUser().equals(event.getAuthor())) {
+	        		return;
+	        	}
+	        	
+	            StringBuilder sb = new StringBuilder();
+	            for(Role r : jda.getGuilds().get(0).getRoles()){
+	                sb.append("[R: " + r.getName() + "(" + r.getId() + ")");
+	            }
+	            event.getChannel().sendMessage(sb.toString()).queue();
+	            event.getMessage().delete().queue();
+	        } else if (args[0].equalsIgnoreCase("!whois")) {
+	        	new BukkitRunnable() {
+	        		public void run() {
+	                    String rawmessage = event.getMessage().getContentRaw();
+	                    String[] rawargs = rawmessage.split(" ");
+	                	try {                    		
+	                        if (rawargs[1].startsWith("<@")) {
+	                        	String id = rawargs[1].replaceAll("<@", "").replaceAll(">", "").replaceAll("!", "");
+	                        	//Bukkit.getLogger().log(Level.INFO, "Ultimate Discord Processing Discord ID: " + id);
 	                    		User user = event.getGuild().getMemberById(id).getUser();
 	                    		id = user.getId();
 	                    		if (MySQL.userExists(id)) {
@@ -95,15 +97,15 @@ public class MessageListener extends ListenerAdapter {
 	                    		} else {
 	                    			event.getChannel().sendMessage(user.getAsMention() + " is not currently linked to a Minecraft Account.").queue();;
 	                    		}
-                            } else {
-                            	event.getChannel().sendMessage("You did not mention a discord user.").queue();
-                            }
-                    	} catch (Exception e) {
-                    		event.getChannel().sendMessage("Unknown User Id: " + rawargs[1]).queue();
-                    	}
-            		}
-            	}.runTaskAsynchronously(Main.instance);
-            }
+	                        } else {
+	                        	event.getChannel().sendMessage("You did not mention a discord user.").queue();
+	                        }
+	                	} catch (Exception e) {
+	                		event.getChannel().sendMessage("Unknown User Id: " + rawargs[1]).queue();
+	                	}
+	        		}
+	        	}.runTaskAsynchronously(Main.instance);
+	        }
         }
     }
     
